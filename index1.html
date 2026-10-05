@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Liquidación de fruta</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f3f5ef;--card:#fff;--ink:#1d2a1f;--mut:#667366;--line:#d8ddd0;--acc:#2f6b3a;--acc2:#e8f1e4;--neg:#b3321f;--pos:#1f7a3a;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#141a15;--card:#1d261f;--ink:#e8eee6;--mut:#9aa89a;--line:#2f3b31;--acc:#7cc487;--acc2:#233427;--neg:#ff8a76;--pos:#7cd48e}}
+:root[data-theme="dark"]{--bg:#141a15;--card:#1d261f;--ink:#e8eee6;--mut:#9aa89a;--line:#2f3b31;--acc:#7cc487;--acc2:#233427;--neg:#ff8a76;--pos:#7cd48e}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.4 'Source Sans 3',system-ui,sans-serif}
+main{max-width:760px;margin:0 auto;padding:16px}
+h1,h2{font-family:'Bricolage Grotesque',system-ui,sans-serif;margin:0}
+h1{font-size:26px}
+h2{font-size:18px;margin-bottom:10px}
+section{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;margin:14px 0}
+.bar{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.bar select{flex:1;min-width:180px}
+.g{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+label{display:block;font-size:13px;color:var(--mut);font-weight:600}
+input,select{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:8px;margin-top:3px}
+input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid var(--acc);outline-offset:1px}
+button{font:inherit;font-weight:600;border:1px solid var(--acc);background:var(--acc);color:var(--card);border-radius:6px;padding:8px 14px;cursor:pointer}
+button.s{background:transparent;color:var(--acc)}
+button.x{background:transparent;border-color:var(--line);color:var(--neg);padding:8px 11px}
+.row{display:grid;grid-template-columns:1fr 130px 40px;gap:8px;margin-bottom:8px}
+.row4{display:grid;grid-template-columns:1fr 105px 80px 40px;gap:8px;margin-bottom:8px;align-items:center}.row4.hd{font-size:13px;color:var(--mut);font-weight:600;margin-bottom:4px}.ck{text-align:right;font-variant-numeric:tabular-nums;font-size:14px}
+.row5{display:grid;grid-template-columns:140px 1fr 1fr 40px;gap:8px;margin-bottom:8px;align-items:center}.row5.hd{font-size:13px;color:var(--mut);font-weight:600;margin-bottom:4px}
+.row6{display:grid;grid-template-columns:130px 1fr 105px 1fr 40px;gap:8px;margin-bottom:8px;align-items:center}.row6.hd{font-size:13px;color:var(--mut);font-weight:600;margin-bottom:4px}
+[hidden]{display:none!important}
+.vrow{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:8px;border:1px solid var(--line);border-radius:8px;margin-bottom:8px}
+#login{position:fixed;inset:0;background:var(--bg);z-index:10;display:grid;place-items:center;padding:16px}#login>div{width:100%;max-width:340px}
+.res{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--line)}
+.res:last-child{border:0}
+.res b{font-variant-numeric:tabular-nums}
+.big{background:var(--acc2);border-radius:8px;padding:12px;margin-top:8px}
+.big .res{border-color:transparent}
+.big .t{font-size:22px;font-family:'Bricolage Grotesque',sans-serif}
+.pos{color:var(--pos)}.neg{color:var(--neg)}
+table{width:100%;border-collapse:collapse;font-size:14px}th,td{padding:6px 8px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}th:first-child,td:first-child{text-align:left}th{color:var(--mut);font-weight:600}
+.hint{font-size:13px;color:var(--mut);margin:6px 0 0}
+</style>
+</head>
+<body>
+<div id="login" hidden><div>
+<h1>Liquidación de fruta</h1>
+<p class="hint">Ingresa con tu correo y clave.</p>
+<label>Correo<input id="lmail" type="email" autocomplete="username"></label>
+<label style="margin-top:8px">Clave<input id="lpass" type="password" autocomplete="current-password"></label>
+<p id="lerr" class="neg"></p>
+<button id="entrar" style="width:100%">Entrar</button>
+</div></div>
+<main>
+<h1>Liquidación de fruta</h1>
+<div class="bar" style="align-items:center"><span id="est" class="hint" style="flex:1;margin:0"></span><button id="sync" class="s">Sincronizar</button><button id="salir" class="s" hidden>Salir</button></div>
+<div class="bar">
+  <select id="sel" aria-label="Lote"></select>
+  <button id="nuevo">Nuevo lote</button>
+  <button id="borrar" class="s">Eliminar</button>
+</div>
+
+<section>
+<h2>Compra</h2>
+<div class="g">
+  <label>Nombre del lote<input id="nombre" placeholder="Ej: Paltas Juan Pérez"></label>
+  <label>Fecha<input id="fecha" type="date"></label>
+  <label>N° guía o factura<input id="doc"></label>
+</div>
+<h2 style="margin-top:14px;font-size:15px">Líneas de compra (kilos y precio)</h2>
+<div id="compras"></div>
+<button id="addcomp" class="s">+ Agregar línea</button>
+<div class="res"><span>Total kilos comprados</span><b id="tkg">0 kg</b></div>
+<div class="res"><span>Total compra</span><b id="tcompra">$0</b></div>
+<div class="res"><span>Precio promedio por kilo</span><b id="tprom">$0</b></div>
+</section>
+
+<section>
+<h2>Calificación (kilos)</h2>
+<div class="g">
+  <label>Cat. 1 · kilos<input id="c1" type="number" inputmode="decimal"></label>
+  <label>Cat. 1 · cajas<input id="b1" type="number" inputmode="decimal"></label>
+  <label>Cat. 2 · kilos<input id="c2" type="number" inputmode="decimal"></label>
+  <label>Cat. 2 · cajas<input id="b2" type="number" inputmode="decimal"></label>
+  <label>Cat. 3 · kilos<input id="c3" type="number" inputmode="decimal"></label>
+  <label>Cat. 3 · cajas<input id="b3" type="number" inputmode="decimal"></label>
+  <label>Merma · kilos<input id="merma" type="number" inputmode="decimal"></label>
+</div>
+<div class="res"><span>Total kilos clasificados</span><b id="tclas">0 kg</b></div>
+<div class="res"><span>Total cajas</span><b id="tcajas">0</b></div>
+<div class="res"><span>Diferencia sin explicar (comprado − clasificado − merma)</span><b id="dif">0 kg</b></div>
+</section>
+
+<section>
+<h2>Costos asociados</h2>
+<div class="row4 hd"><span>Concepto</span><span>Total $</span><span>$ por kg</span><span></span></div>
+<div id="costos"></div>
+<button id="addc" class="s">+ Agregar costo</button>
+<div class="res"><span>Total costos</span><b id="tcostos">$0</b></div>
+<div class="res"><span>Total costo por kilo</span><b id="tcostokg">$0</b></div>
+</section>
+
+<section>
+<h2>Ventas por categoría</h2>
+<h2 style="font-size:15px">Ventas registradas</h2>
+<div id="ventas"></div>
+<button id="addv" class="s">+ Registrar venta</button>
+<p class="hint">Si registras ventas, los kilos y precios de abajo se calculan solos (precio promedio por categoría).</p>
+<h2 style="margin-top:14px;font-size:15px">Resumen por categoría</h2>
+<div class="g">
+  <label>Cat. 1 · kilos vendidos<input id="v1" type="number" inputmode="decimal"></label>
+  <label>Cat. 1 · precio $/kg<input id="p1" type="number" inputmode="decimal"></label>
+  <label>Cat. 2 · kilos vendidos<input id="v2" type="number" inputmode="decimal"></label>
+  <label>Cat. 2 · precio $/kg<input id="p2" type="number" inputmode="decimal"></label>
+  <label>Cat. 3 · kilos vendidos<input id="v3" type="number" inputmode="decimal"></label>
+  <label>Cat. 3 · precio $/kg<input id="p3" type="number" inputmode="decimal"></label>
+</div>
+</section>
+
+<section>
+<h2>Resultado</h2>
+<div class="res"><span>Costo compra</span><b id="rcompra">$0</b></div>
+<div class="res"><span>Costos asociados</span><b id="rcostos">$0</b></div>
+<div class="res"><span>Costo total real</span><b id="rtotal">$0</b></div>
+<div class="res"><span>Costo real por kilo clasificado</span><b id="rkg">$0</b></div>
+<div class="res"><span>Venta total</span><b id="rventa">$0</b></div>
+<div style="overflow-x:auto;margin-top:10px"><table id="det"><thead><tr><th>Cat.</th><th>Kg</th><th>Cajas</th><th>Costo/kg</th><th>Costo</th><th>Venta</th><th>Ganancia</th></tr></thead><tbody></tbody></table></div>
+<div class="big">
+  <div class="res"><span>Ganancia</span><b id="rgan" class="t">$0</b></div>
+  <div class="res"><span>Ganancia por kilo clasificado</span><b id="rgkg">$0</b></div>
+  <div class="res"><span>% ganancia sobre costo</span><b id="rpc">0%</b></div>
+  <div class="res"><span>% ganancia sobre venta</span><b id="rmar">0%</b></div>
+</div>
+</section>
+
+<section>
+<h2>Oferta por todo el lote</h2>
+<div class="g">
+  <label>Margen que quiero ($ por kg)<input id="margen" type="number" inputmode="decimal"></label>
+</div>
+<div class="res"><span>Precio mínimo (no perder plata)</span><b id="pmin">$0</b></div>
+<div class="res"><span>Precio con mi margen</span><b id="pmar">$0</b></div>
+<p class="hint">El precio por kilo es sobre el total de kilos clasificados (cat. 1 + 2 + 3).</p>
+</section>
+<section>
+<h2>Abonos y saldo por pagar</h2>
+<div class="g">
+  <label>Socio 1<input id="s1n"></label>
+  <label>Socio 2<input id="s2n"></label>
+  <label>% participación socio 1<input id="sp" type="number" inputmode="decimal"></label>
+</div>
+<p class="hint" id="sp2"></p>
+<label style="margin-top:8px">Quién puso la plata de los costos asociados<select id="cp"><option value="1"></option><option value="2"></option><option value="p">Según % de participación</option></select></label>
+<h2 style="margin-top:14px;font-size:15px">Abonos al productor</h2>
+<div class="row5 hd"><span>Fecha</span><span>Monto $</span><span>Pagó</span><span></span></div>
+<div id="abonos"></div>
+<button id="addab" class="s">+ Agregar abono</button>
+<div class="res"><span>Costo total real (compra + asociados)</span><b id="rctot">$0</b></div>
+<div class="res"><span>Ganancia del lote</span><b id="rgs">$0</b></div>
+<div class="res"><span>Total a recuperar (costo + ganancia)</span><b id="rrec">$0</b></div>
+<div class="res"><span>Total a pagar al productor (compra)</span><b id="tpagar">$0</b></div>
+<div class="res"><span>Total abonado</span><b id="tabon">$0</b></div>
+<div class="big"><div class="res"><span id="slbl">Saldo por pagar</span><b id="saldo" class="t">$0</b></div></div>
+<div style="overflow-x:auto;margin-top:10px"><table id="soc"><thead><tr><th>Socio</th><th>Costo aportado</th><th>Ganancia</th><th>Total a recibir</th></tr></thead><tbody></tbody></table></div>
+<h2 style="margin-top:16px;font-size:15px">Cobros recibidos (cuánto te han pagado)</h2>
+<div class="row6 hd"><span>Fecha</span><span>Monto $</span><span>Tipo</span><span>Recibe</span><span></span></div>
+<div id="cobros"></div>
+<button id="addcc" class="s">+ Cobro de costo</button> <button id="addcg" class="s">+ Cobro de ganancia</button>
+<div style="overflow-x:auto;margin-top:10px"><table id="cob"><thead><tr><th>Socio</th><th>Costo a recibir</th><th>Costo cobrado</th><th>Saldo costo</th><th>Ganancia a recibir</th><th>Ganancia cobrada</th><th>Saldo ganancia</th><th>Saldo total</th></tr></thead><tbody></tbody></table></div>
+<div class="big"><div class="res"><span>Saldo por cobrar (costo + ganancia)</span><b id="cobsaldo" class="t">$0</b></div></div>
+<p class="hint">Costo aportado = abonos que pagó + costos asociados que puso. Total a recibir = costo aportado + su % de la ganancia.</p>
+</section>
+<p class="hint">Los datos se guardan solo en este navegador.</p>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.2/dist/umd/supabase.js"></script>
+<script>
+// ===== PEGA AQUÍ TUS DATOS DE SUPABASE =====
+const SB_URL='https://ruujgblgrxdkktgctppv.supabase.co';
+const SB_KEY='sb_publishable_PS1k93qY2CHhruhPpUmqlQ_5u0-S71O';
+// ============================================
+const sb=(SB_URL&&SB_KEY&&window.supabase)?window.supabase.createClient(SB_URL,SB_KEY):null;
+const tm={};let logged=false;
+const est=t=>{const e=document.getElementById('est');if(e)e.textContent=t};
+const KEY='liq_lotes_v1';
+const NUM=['merma','c1','c2','c3','b1','b2','b3','v1','v2','v3','p1','p2','p3','margen'];
+const TXT=['nombre','fecha','doc'];
+const $=id=>document.getElementById(id);
+const fmt=n=>(n<0?'-':'')+'$'+Math.round(Math.abs(n)).toLocaleString('es-CL');
+const kgf=n=>(Math.round(n*100)/100).toLocaleString('es-CL')+' kg';
+let lotes=[],cur=null;
+try{lotes=JSON.parse(localStorage.getItem(KEY))||[]}catch(e){lotes=[]}
+let soc={n1:'Osvaldo',n2:'Jaime',p:50};
+try{soc=Object.assign(soc,JSON.parse(localStorage.getItem('liq_socios_v1'))||{})}catch(e){}
+function saveSoc(){try{localStorage.setItem('liq_socios_v1',JSON.stringify(soc))}catch(e){}pushSoc()}
+const norm=l=>{if(!l.ventas)l.ventas=[];if(!l.abonos)l.abonos=[];if(!l.cobros)l.cobros=[];if(!l.compras)l.compras=[{kg:l.kg||0,pk:l.pk||0}];['b1','b2','b3'].forEach(k=>l[k]=l[k]||0);['1','2','3'].forEach(i=>{if(l['v'+i]==null)l['v'+i]=l['c'+i]||0})};
+lotes.forEach(norm);
+function save(){try{localStorage.setItem(KEY,JSON.stringify(lotes))}catch(e){}if(sb&&cur)push(cur)}
+function push(l,now){
+  if(!sb)return;clearTimeout(tm[l.id]);
+  const go=async()=>{est('Guardando…');const {error}=await sb.from('liquidaciones').upsert({id:String(l.id),data:l,updated_at:new Date().toISOString()});est(error?'Error al guardar: '+error.message:'Guardado en la nube')};
+  if(now)go();else tm[l.id]=setTimeout(go,600);
+}
+async function pushSoc(){if(!sb)return;const {error}=await sb.from('liquidaciones').upsert({id:'__socios',data:soc,updated_at:new Date().toISOString()});est(error?'Error al guardar: '+error.message:'Guardado en la nube')}
+async function cloud(){
+  try{
+    const {data,error}=await sb.from('liquidaciones').select('id,data');
+    if(error)throw error;
+    const ids=new Set(),rem=[];let haySoc=false;
+    data.forEach(r=>{if(r.id==='__socios'){soc=Object.assign(soc,r.data);haySoc=true}else{ids.add(r.id);rem.push(r.data)}});
+    let loc=[];
+    if(!localStorage.getItem('liq_migrado')){loc=lotes.filter(l=>!ids.has(String(l.id)));loc.forEach(l=>push(l,true));if(!haySoc)pushSoc();localStorage.setItem('liq_migrado','1')}
+    const keep=cur?cur.id:null;
+    lotes=rem.concat(loc);lotes.forEach(norm);lotes.sort((a,b)=>b.id-a.id);
+    cur=lotes.find(l=>l.id===keep)||null;
+    est('Sincronizado con la nube');
+  }catch(e){est('Sin conexión: '+(e.message||e))}
+}
+function nuevo(){
+  const l={id:Date.now(),nombre:'',fecha:new Date().toISOString().slice(0,10),doc:'',compras:[{kg:0,pk:0}],abonos:[],cobros:[],ventas:[],c1:0,c2:0,c3:0,b1:0,b2:0,b3:0,v1:0,v2:0,v3:0,p1:0,p2:0,p3:0,margen:0,
+    costos:['Bajada de bins','Hechura de cajas','Cajas','Entrada','Feria','Flete'].map(c=>({c,m:0}))};
+  lotes.unshift(l);cur=l;save();fill();
+}
+function opts(){
+  $('sel').innerHTML=lotes.map(l=>`<option value="${l.id}" ${l===cur?'selected':''}>${(l.nombre||'Sin nombre').replace(/</g,'&lt;')} · ${l.fecha||''}</option>`).join('');
+}
+function fill(){
+  opts();
+  TXT.forEach(k=>$(k).value=cur[k]||'');
+  NUM.forEach(k=>$(k).value=cur[k]||'');
+  rCompras();rCostos();rVentas();rAbonos();rCobros();$('s1n').value=soc.n1;$('s2n').value=soc.n2;$('sp').value=soc.p;$('cp').value=cur.cp||'1';calc();
+}
+function rCompras(){
+  const box=$('compras');box.innerHTML='';
+  cur.compras.forEach((it,i)=>{
+    const r=document.createElement('div');r.className='row';
+    r.innerHTML=`<input type="number" inputmode="decimal" aria-label="Kilos" placeholder="Kilos"><input type="number" inputmode="decimal" aria-label="Precio por kilo" placeholder="$ por kg"><button class="x" aria-label="Quitar">✕</button>`;
+    const [a,b,x]=r.children;
+    a.value=it.kg||'';b.value=it.pk||'';
+    a.oninput=()=>{it.kg=+a.value||0;save();calc()};
+    b.oninput=()=>{it.pk=+b.value||0;save();calc()};
+    x.onclick=()=>{cur.compras.splice(i,1);if(!cur.compras.length)cur.compras.push({kg:0,pk:0});save();rCompras();calc()};
+    box.appendChild(r);
+  });
+}
+function rAbonos(){
+  const box=$('abonos');box.innerHTML='';
+  cur.abonos.forEach((it,i)=>{
+    const r=document.createElement('div');r.className='row5';
+    r.innerHTML=`<input type="date" aria-label="Fecha"><input type="number" inputmode="decimal" aria-label="Monto" placeholder="Monto $"><select aria-label="Quién pagó"><option value="1"></option><option value="2"></option></select><button class="x" aria-label="Quitar">✕</button>`;
+    const [f,m,q,x]=r.children;
+    q.options[0].textContent=soc.n1||'Socio 1';q.options[1].textContent=soc.n2||'Socio 2';
+    f.value=it.f||'';m.value=it.m||'';q.value=it.q||1;
+    f.oninput=()=>{it.f=f.value;save()};
+    m.oninput=()=>{it.m=+m.value||0;save();calc()};
+    q.onchange=()=>{it.q=+q.value;save();calc()};
+    x.onclick=()=>{cur.abonos.splice(i,1);save();rAbonos();calc()};
+    box.appendChild(r);
+  });
+}
+function rCobros(){
+  const box=$('cobros');box.innerHTML='';
+  cur.cobros.forEach((it,i)=>{
+    const r=document.createElement('div');r.className='row6';
+    r.innerHTML=`<input type="date" aria-label="Fecha"><input type="number" inputmode="decimal" aria-label="Monto" placeholder="Monto $"><select aria-label="Tipo"><option value="c">Costo</option><option value="g">Ganancia</option></select><select aria-label="Quién recibe"><option value="1"></option><option value="2"></option></select><button class="x" aria-label="Quitar">✕</button>`;
+    const [f,m,t,q,x]=r.children;
+    q.options[0].textContent=soc.n1||'Socio 1';q.options[1].textContent=soc.n2||'Socio 2';
+    f.value=it.f||'';m.value=it.m||'';t.value=it.t||'c';q.value=it.q||1;
+    f.oninput=()=>{it.f=f.value;save()};
+    m.oninput=()=>{it.m=+m.value||0;save();calc()};
+    t.onchange=()=>{it.t=t.value;save();calc()};
+    q.onchange=()=>{it.q=+q.value;save();calc()};
+    x.onclick=()=>{cur.cobros.splice(i,1);save();rCobros();calc()};
+    box.appendChild(r);
+  });
+}
+function rVentas(){
+  const box=$('ventas');box.innerHTML='';
+  cur.ventas.forEach((it,i)=>{
+    const r=document.createElement('div');r.className='vrow';
+    r.innerHTML=`<input type="date" aria-label="Fecha"><input style="grid-column:span 2" placeholder="Cliente" aria-label="Cliente"><select aria-label="Categoría"><option value="1">Cat. 1</option><option value="2">Cat. 2</option><option value="3">Cat. 3</option></select><input type="number" inputmode="decimal" placeholder="Kilos" aria-label="Kilos"><input type="number" inputmode="decimal" placeholder="$ por kg" aria-label="Precio por kilo"><button class="x" style="grid-column:1/-1;justify-self:end" aria-label="Quitar venta">Quitar</button>`;
+    const [f,cl,ct,k,p,x]=r.children;
+    f.value=it.f||'';cl.value=it.cl||'';ct.value=it.c||1;k.value=it.k||'';p.value=it.p||'';
+    f.oninput=()=>{it.f=f.value;save()};
+    cl.oninput=()=>{it.cl=cl.value;save()};
+    ct.onchange=()=>{it.c=+ct.value;save();calc()};
+    k.oninput=()=>{it.k=+k.value||0;save();calc()};
+    p.oninput=()=>{it.p=+p.value||0;save();calc()};
+    x.onclick=()=>{cur.ventas.splice(i,1);save();rVentas();calc()};
+    box.appendChild(r);
+  });
+}
+function rCostos(){
+  const box=$('costos');box.innerHTML='';
+  cur.costos.forEach((it,i)=>{
+    const r=document.createElement('div');r.className='row4';
+    r.innerHTML=`<input list="conc" value="" aria-label="Concepto" placeholder="Concepto"><input type="number" inputmode="decimal" aria-label="Monto total" placeholder="Total $"><span class="ck">$0</span><button class="x" aria-label="Quitar">✕</button>`;
+    const [a,b,k,x]=r.children;
+    a.value=it.c;b.value=it.m||'';
+    a.oninput=()=>{it.c=a.value;save()};
+    b.oninput=()=>{it.m=+b.value||0;save();calc()};
+    x.onclick=()=>{cur.costos.splice(i,1);save();rCostos();calc()};
+    box.appendChild(r);
+  });
+}
+function calc(){
+  const c=cur,n=k=>+c[k]||0;
+  const vs=c.ventas||[];
+  [1,2,3].forEach(i=>{const L=vs.filter(x=>(x.c||1)==i),kil=L.reduce((t,x)=>t+(+x.k||0),0),mon=L.reduce((t,x)=>t+(+x.k||0)*(+x.p||0),0),auto=vs.length>0;
+    if(auto){c['v'+i]=kil;c['p'+i]=kil?mon/kil:0;$('v'+i).value=kil||'';$('p'+i).value=kil?Math.round(mon/kil):''}
+    $('v'+i).disabled=auto;$('p'+i).disabled=auto});
+  const kgc=c.compras.reduce((t,x)=>t+(+x.kg||0),0);
+  const compra=c.compras.reduce((t,x)=>t+(+x.kg||0)*(+x.pk||0),0);
+  const clas=n('c1')+n('c2')+n('c3');
+  const costos=c.costos.reduce((t,x)=>t+(+x.m||0),0);
+  const total=compra+costos;
+  const ckg=clas?total/clas:0;
+  let venta=0,tb=0,rows='';
+  [1,2,3].forEach(i=>{
+    const v=n('v'+i)*n('p'+i),cs=n('c'+i)*ckg;venta+=v;tb+=n('b'+i);
+    rows+=`<tr><td>Cat. ${i}</td><td>${n('c'+i).toLocaleString('es-CL')}</td><td>${n('b'+i).toLocaleString('es-CL')}</td><td>${fmt(ckg)}</td><td>${fmt(cs)}</td><td>${fmt(v)}</td><td class="${v-cs>=0?'pos':'neg'}">${fmt(v-cs)}</td></tr>`;
+  });
+  rows+=`<tr><td><b>Total</b></td><td><b>${clas.toLocaleString('es-CL')}</b></td><td><b>${tb.toLocaleString('es-CL')}</b></td><td></td><td><b>${fmt(total)}</b></td><td><b>${fmt(venta)}</b></td><td class="${venta-total>=0?'pos':'neg'}"><b>${fmt(venta-total)}</b></td></tr>`;
+  document.querySelector('#det tbody').innerHTML=rows;
+  const gan=venta-total;
+  const ab=c.abonos||[],tab=ab.reduce((t,x)=>t+(+x.m||0),0);
+  const a1=ab.filter(x=>(x.q||1)==1).reduce((t,x)=>t+(+x.m||0),0),a2=tab-a1;
+  const q1=Math.min(Math.max(+soc.p||0,0),100)/100,q2=1-q1;
+  const n1=soc.n1||'Socio 1',n2=soc.n2||'Socio 2';
+  const saldo=compra-tab;
+  $('tpagar').textContent=fmt(compra);
+  $('tabon').textContent=fmt(tab);
+  $('saldo').textContent=fmt(Math.abs(saldo));
+  $('saldo').className='t '+(saldo>0?'neg':'pos');
+  $('slbl').textContent=saldo>0.5?'Saldo por pagar':(saldo<-0.5?'Pagado de más':'Saldo: pagado completo');
+  $('sp2').textContent=n1+' '+(q1*100).toLocaleString('es-CL')+'% · '+n2+' '+(q2*100).toLocaleString('es-CL')+'%';
+  const e=t=>String(t).replace(/</g,'&lt;');
+  const cp=c.cp||'1',ca1=cp=='1'?costos:(cp=='p'?costos*q1:0),ca2=costos-ca1;
+  const k1=a1+ca1,k2=a2+ca2,g1=gan*q1,g2=gan*q2;
+  const rw=(nm,k,g)=>`<tr><td>${e(nm)}</td><td>${fmt(k)}</td><td class="${g>=0?'pos':'neg'}">${fmt(g)}</td><td><b>${fmt(k+g)}</b></td></tr>`;
+  document.querySelector('#soc tbody').innerHTML=rw(n1,k1,g1)+rw(n2,k2,g2)+`<tr><td><b>Total</b></td><td><b>${fmt(k1+k2)}</b></td><td><b>${fmt(gan)}</b></td><td><b>${fmt(k1+k2+gan)}</b></td></tr>`;
+  const cb=c.cobros||[],sm=(t,q)=>cb.filter(x=>(x.t||'c')==t&&(x.q||1)==q).reduce((u,x)=>u+(+x.m||0),0);
+  const cr=(nm,q,k,g)=>{const cc=sm('c',q),cg=sm('g',q);return [nm,k,cc,k-cc,g,cg,g-cg,k-cc+g-cg]};
+  const R=[cr(n1,1,k1,g1),cr(n2,2,k2,g2)];
+  const T=R[0].map((_,j)=>j?R[0][j]+R[1][j]:'Total');
+  const trow=(a,b)=>`<tr><td>${b?'<b>'+e(a[0])+'</b>':e(a[0])}</td>`+a.slice(1).map((v,j)=>`<td>${j==6||b?'<b>'+fmt(v)+'</b>':fmt(v)}</td>`).join('')+'</tr>';
+  document.querySelector('#cob tbody').innerHTML=trow(R[0])+trow(R[1])+trow(T,1);
+  $('cobsaldo').textContent=fmt(T[7]);
+  $('cobsaldo').className='t '+(T[7]>0.5?'neg':'pos');
+  $('rctot').textContent=fmt(total);
+  $('rgs').textContent=fmt(gan);
+  $('rrec').textContent=fmt(total+gan);
+  const o=$('cp').options;o[0].textContent=n1;o[1].textContent=n2;
+  const base=clas||kgc;
+  document.querySelectorAll('#costos .ck').forEach((el,i)=>{el.textContent=fmt(base?(+c.costos[i].m||0)/base:0)});
+  $('tcostokg').textContent=fmt(base?costos/base:0);
+  $('tprom').textContent=fmt(kgc?compra/kgc:0);
+  $('tclas').textContent=kgf(clas);
+  $('tcajas').textContent=tb.toLocaleString('es-CL');
+  $('tkg').textContent=kgf(kgc);
+  $('tcompra').textContent=fmt(compra);
+  $('dif').textContent=kgf(kgc-clas-n('merma'));
+  $('tcostos').textContent=fmt(costos);
+  $('rcompra').textContent=fmt(compra);
+  $('rcostos').textContent=fmt(costos);
+  $('rtotal').textContent=fmt(total);
+  $('rkg').textContent=fmt(ckg);
+  $('rventa').textContent=fmt(venta);
+  $('rgan').textContent=fmt(gan);
+  $('rgan').className='t '+(gan>=0?'pos':'neg');
+  $('rgkg').textContent=fmt(clas?gan/clas:0);
+  $('rpc').textContent=total?(gan/total*100).toFixed(1).replace('.',',')+'%':'0%';
+  $('rmar').textContent=venta?(gan/venta*100).toFixed(1).replace('.',',')+'%':'0%';
+  $('pmin').textContent=fmt(ckg);
+  $('pmar').textContent=fmt(ckg+n('margen'));
+}
+NUM.forEach(k=>$(k).oninput=()=>{cur[k]=+$(k).value||0;save();calc()});
+TXT.forEach(k=>$(k).oninput=()=>{cur[k]=$(k).value;save();if(k!=='doc'){const o=$('sel').selectedOptions[0];if(o)o.textContent=(cur.nombre||'Sin nombre')+' · '+(cur.fecha||'')}});
+$('addcomp').onclick=()=>{cur.compras.push({kg:0,pk:0});save();rCompras()};
+$('addab').onclick=()=>{cur.abonos.push({f:new Date().toISOString().slice(0,10),m:0,q:1});save();rAbonos()};
+$('addcc').onclick=()=>{cur.cobros.push({f:new Date().toISOString().slice(0,10),m:0,t:'c',q:1});save();rCobros()};
+$('addcg').onclick=()=>{cur.cobros.push({f:new Date().toISOString().slice(0,10),m:0,t:'g',q:1});save();rCobros()};
+$('s1n').oninput=()=>{soc.n1=$('s1n').value;saveSoc();rAbonos();rCobros();calc()};
+$('s2n').oninput=()=>{soc.n2=$('s2n').value;saveSoc();rAbonos();rCobros();calc()};
+$('cp').onchange=()=>{cur.cp=$('cp').value;save();calc()};
+$('sp').oninput=()=>{soc.p=+$('sp').value||0;saveSoc();calc()};
+$('addv').onclick=()=>{cur.ventas.push({f:new Date().toISOString().slice(0,10),cl:'',c:1,k:0,p:0});save();rVentas()};
+$('addc').onclick=()=>{cur.costos.push({c:'',m:0});save();rCostos()};
+$('nuevo').onclick=nuevo;
+$('sel').onchange=e=>{cur=lotes.find(l=>String(l.id)===e.target.value);fill()};
+$('borrar').onclick=async()=>{
+  if(!confirm('¿Eliminar este lote?'))return;
+  const id=cur.id;lotes=lotes.filter(l=>l!==cur);cur=null;save();
+  if(sb){clearTimeout(tm[id]);const {error}=await sb.from('liquidaciones').delete().eq('id',String(id));est(error?'Error al eliminar: '+error.message:'Eliminado en la nube')}
+  boot();
+};
+const dl=document.createElement('datalist');dl.id='conc';
+dl.innerHTML=['Bajada de bins','Hechura de cajas','Cajas','Entrada','Feria','Flete','Mano de obra','Otro'].map(x=>`<option value="${x}">`).join('');
+document.body.appendChild(dl);
+function boot(){if(!cur)cur=lotes[0]||null;if(cur)fill();else nuevo()}
+async function start(){
+  if(!sb){est('Modo local (sin nube)');boot();return}
+  const {data}=await sb.auth.getSession();
+  if(!data.session){$('login').hidden=false;return}
+  logged=true;$('salir').hidden=false;await cloud();boot();
+}
+if(sb){
+  $('entrar').onclick=async()=>{
+    $('lerr').textContent='';
+    const {error}=await sb.auth.signInWithPassword({email:$('lmail').value.trim(),password:$('lpass').value});
+    if(error){$('lerr').textContent='Correo o clave incorrectos';return}
+    $('login').hidden=true;logged=true;$('salir').hidden=false;await cloud();boot();
+  };
+  $('lpass').onkeydown=e=>{if(e.key==='Enter')$('entrar').click()};
+  $('salir').onclick=async()=>{await sb.auth.signOut();location.reload()};
+  $('sync').onclick=async()=>{if(logged){await cloud();boot()}};
+  document.addEventListener('visibilitychange',async()=>{if(document.visibilityState==='visible'&&logged){await cloud();boot()}});
+}else $('sync').hidden=true;
+start();
+</script>
+</body>
+</html>
